@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MAK Trading Dashboard</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .header {
+        background: #111827;
+        color: white;
+        padding: 20px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 25px;
+    }
+
+    .header p {
+        margin: 5px 0 0;
+        color: #d1d5db;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+
+    .card-value {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .form-box {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .form-box h2 {
+        margin-top: 0;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        align-items: end;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+
+    .calculated {
+        background: #f3f4f6;
+    }
+
+    button {
+        border: none;
+        border-radius: 6px;
+        padding: 11px 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .add-btn {
+        background: #2563eb;
+        color: white;
+    }
+
+    .add-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .export-btn {
+        background: #111827;
+        color: white;
+    }
+
+    .clear-btn {
+        background: #dc2626;
+        color: white;
+    }
+
+    .table-box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .table-header h2 {
+        margin: 0;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+    }
+
+    th {
+        background: #1f2937;
+        color: white;
+        padding: 11px;
+        text-align: left;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 13px;
+    }
+
+    tr:hover {
+        background: #f9fafb;
+    }
+
+    .buy {
+        color: #15803d;
+        font-weight: bold;
+    }
+
+    .sell {
+        color: #dc2626;
+        font-weight: bold;
+    }
+
+    .profit {
+        color: #15803d;
+        font-weight: bold;
+    }
+
+    .loss {
+        color: #dc2626;
+        font-weight: bold;
+    }
+
+    .delete-btn {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 6px 9px;
+        font-size: 12px;
+    }
+
+    .empty {
+        text-align: center;
+        color: #6b7280;
+        padding: 30px;
+    }
+
+    .footer {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        padding: 25px;
+    }
+
+    @media (max-width: 900px) {
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            padding: 10px;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .actions {
+            width: 100%;
+        }
+
+        .actions button {
+            flex: 1;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>MAK Trading Dashboard</h1>
+    <p>MEC Trading Journal & Portfolio Tracker</p>
+</div>
+
+<div class="container">
+
+    <!-- SUMMARY CARDS -->
+    <div class="cards">
+
+        <div class="card">
+            <div class="card-title">MEC Balance</div>
+            <div class="card-value" id="mecBalance">0.0000</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">USDT Spent</div>
+            <div class="card-value" id="usdtSpent">$0.00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">USDT Received</div>
+            <div class="card-value" id="usdtReceived">$0.00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Total Profit</div>
+            <div class="card-value" id="totalProfit">$0.00</div>
+        </div>
+
+    </div>
+
+    <!-- ADD TRANSACTION -->
+    <div class="form-box">
+
+        <h2>Add Transaction</h2>
+
+        <div class="form-grid">
+
+            <div>
+                <label>Date</label>
+                <input type="date" id="date">
+            </div>
+
+            <div>
+                <label>Type</label>
+                <select id="type">
+                    <option value="BUY">BUY</option>
+                    <option value="SELL">SELL</option>
+                </select>
+            </div>
+
+            <div>
+                <label>MEC Quantity</label>
+                <input
+                    type="number"
+                    id="quantity"
+                    step="0.0001"
+                    min="0"
+                    placeholder="e.g. 2.5">
+            </div>
+
+            <div>
+                <label>Unit Price (USDT)</label>
+                <input
+                    type="number"
+                    id="unitPrice"
+                    step="0.0001"
+                    min="0"
+                    placeholder="e.g. 7.20">
+            </div>
+
+            <div>
+                <label>Total Amount (USDT)</label>
+                <input
+                    type="number"
+                    id="amount"
+                    class="calculated"
+                    readonly>
+            </div>
+
+            <div>
+                <label>Notes</label>
+                <input
+                    type="text"
+                    id="notes"
+                    placeholder="Optional">
+            </div>
+
+            <div>
+                <button class="add-btn" onclick="addTransaction()">
+                    + Add Transaction
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TRANSACTION TABLE -->
+    <div class="table-box">
+
+        <div class="table-header">
+
+            <h2>Trading Records</h2>
+
+            <div class="actions">
+                <button class="export-btn" onclick="exportCSV()">
+                    Export CSV
+                </button>
+
+                <button class="clear-btn" onclick="clearAll()">
+                    Clear All
+                </button>
+            </div>
+
+        </div>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>MEC Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Amount</th>
+                    <th>Profit</th>
+                    <th>MEC Balance</th>
+                    <th>USDT Balance</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="tradeTable">
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<div class="footer">
+    MAK Trading Dashboard © 2026
+</div>
+
+
+<script>
+
+let transactions =
+    JSON.parse(localStorage.getItem("makTransactions")) || [];
+
+
+// Set today's date automatically
+document.getElementById("date").value =
+    new Date().toISOString().split("T")[0];
+
+
+// Calculate amount automatically
+document.getElementById("quantity").addEventListener("input", calculateAmount);
+document.getElementById("unitPrice").addEventListener("input", calculateAmount);
+
+
+function calculateAmount() {
+
+    const quantity =
+        parseFloat(document.getElementById("quantity").value) || 0;
+
+    const price =
+        parseFloat(document.getElementById("unitPrice").value) || 0;
+
+    const amount = quantity * price;
+
+    document.getElementById("amount").value =
+        amount.toFixed(4);
+}
+
+
+// Add transaction
+function addTransaction() {
+
+    const date =
+        document.getElementById("date").value;
+
+    const type =
+        document.getElementById("type").value;
+
+    const quantity =
+        parseFloat(document.getElementById("quantity").value);
+
+    const unitPrice =
+        parseFloat(document.getElementById("unitPrice").value);
+
+    const amount =
+        quantity * unitPrice;
+
+    const notes =
+        document.getElementById("notes").value;
+
+
+    if (!date || !quantity || !unitPrice) {
+
+        alert("Please enter the date, MEC quantity and unit price.");
+
+        return;
+    }
+
+
+    const transaction = {
+
+        id: Date.now(),
+
+        date: date,
+
+        type: type,
+
+        quantity: quantity,
+
+        unitPrice: unitPrice,
+
+        amount: amount,
+
+        notes: notes
+
+    };
+
+
+    transactions.push(transaction);
+
+    saveData();
+
+    renderTable();
+
+    updateSummary();
+
+    clearForm();
+}
+
+
+// Save data
+function saveData() {
+
+    localStorage.setItem(
+        "makTransactions",
+        JSON.stringify(transactions)
+    );
+}
+
+
+// Clear form
+function clearForm() {
+
+    document.getElementById("quantity").value = "";
+
+    document.getElementById("unitPrice").value = "";
+
+    document.getElementById("amount").value = "";
+
+    document.getElementById("notes").value = "";
+
+}
+
+
+// Render table
+function renderTable() {
+
+    const table =
+        document.getElementById("tradeTable");
+
+    table.innerHTML = "";
+
+    let mecBalance = 0;
+
+    let usdtBalance = 0;
+
+    let totalProfit = 0;
+
+
+    if (transactions.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="11" class="empty">
+                    No trading records yet.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    transactions.forEach((trade, index) => {
+
+        let profit = 0;
+
+
+        if (trade.type === "BUY") {
+
+            mecBalance += trade.quantity;
+
+            usdtBalance -= trade.amount;
+
+        } else {
+
+            mecBalance -= trade.quantity;
+
+            usdtBalance += trade.amount;
+
+            /*
+                Profit is calculated using the
+                average purchase price of previous BUY trades.
+            */
+
+            const averageBuyPrice =
+                getAverageBuyPrice(index);
+
+            profit =
+                (trade.unitPrice - averageBuyPrice)
+                * trade.quantity;
+
+            totalProfit += profit;
+        }
+
+
+        const profitDisplay =
+            trade.type === "SELL"
+                ? `<span class="${profit >= 0 ? "profit" : "loss"}">
+                    ${profit >= 0 ? "+" : ""}$${profit.toFixed(4)}
+                   </span>`
+                : "-";
+
+
+        const row = document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>${index + 1}</td>
+
+            <td>${trade.date}</td>
+
+            <td class="${trade.type === "BUY" ? "buy" : "sell"}">
+                ${trade.type}
+            </td>
+
+            <td>${trade.quantity.toFixed(4)}</td>
+
+            <td>$${trade.unitPrice.toFixed(4)}</td>
+
+            <td>$${trade.amount.toFixed(4)}</td>
+
+            <td>${profitDisplay}</td>
+
+            <td>${mecBalance.toFixed(4)}</td>
+
+            <td>$${usdtBalance.toFixed(4)}</td>
+
+            <td>${escapeHTML(trade.notes)}</td>
+
+            <td>
+                <button
+                    class="delete-btn"
+                    onclick="deleteTransaction(${trade.id})">
+                    Delete
+                </button>
+            </td>
+
+        `;
+
+
+        table.appendChild(row);
+
+    });
+
+}
+
+
+// Calculate average BUY price before a transaction
+function getAverageBuyPrice(index) {
+
+    let totalQuantity = 0;
+
+    let totalCost = 0;
+
+
+    for (let i = 0; i < index; i++) {
+
+        const trade = transactions[i];
+
+
+        if (trade.type === "BUY") {
+
+            totalQuantity += trade.quantity;
+
+            totalCost += trade.amount;
+
+        }
+
+    }
+
+
+    if (totalQuantity === 0) {
+
+        return 0;
+
+    }
+
+
+    return totalCost / totalQuantity;
+
+}
+
+
+// Update summary cards
+function updateSummary() {
+
+    let mecBalance = 0;
+
+    let usdtSpent = 0;
+
+    let usdtReceived = 0;
+
+    let totalProfit = 0;
+
+
+    transactions.forEach((trade, index) => {
+
+        if (trade.type === "BUY") {
+
+            mecBalance += trade.quantity;
+
+            usdtSpent += trade.amount;
+
+        } else {
+
+            mecBalance -= trade.quantity;
+
+            usdtReceived += trade.amount;
+
+            const averageBuyPrice =
+                getAverageBuyPrice(index);
+
+            const profit =
+                (trade.unitPrice - averageBuyPrice)
+                * trade.quantity;
+
+            totalProfit += profit;
+
+        }
+
+    });
+
+
+    document.getElementById("mecBalance").textContent =
+        mecBalance.toFixed(4);
+
+
+    document.getElementById("usdtSpent").textContent =
+        "$" + usdtSpent.toFixed(2);
+
+
+    document.getElementById("usdtReceived").textContent =
+        "$" + usdtReceived.toFixed(2);
+
+
+    document.getElementById("totalProfit").textContent =
+        "$" + totalProfit.toFixed(2);
+
+}
+
+
+// Delete transaction
+function deleteTransaction(id) {
+
+    if (!confirm("Delete this transaction?")) {
+
+        return;
+
+    }
+
+
+    transactions =
+        transactions.filter(
+            trade => trade.id !== id
+        );
+
+
+    saveData();
+
+    renderTable();
+
+    updateSummary();
+
+}
+
+
+// Clear everything
+function clearAll() {
+
+    if (
+        !confirm(
+            "Are you sure you want to delete ALL trading records?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    transactions = [];
+
+    saveData();
+
+    renderTable();
+
+    updateSummary();
+
+}
+
+
+// Export CSV
+function exportCSV() {
+
+    if (transactions.length === 0) {
+
+        alert("There are no transactions to export.");
+
+        return;
+
+    }
+
+
+    let csv =
+        "Date,Type,MEC Quantity,Unit Price,Total Amount,Notes\n";
+
+
+    transactions.forEach(trade => {
+
+        csv +=
+            `"${trade.date}",` +
+            `"${trade.type}",` +
+            `"${trade.quantity}",` +
+            `"${trade.unitPrice}",` +
+            `"${trade.amount}",` +
+            `"${trade.notes}"\n`;
+
+    });
+
+
+    const blob =
+        new Blob([csv], { type: "text/csv" });
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.download =
+        "MAK_MEC_Trading_Journal.csv";
+
+
+    link.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+// Prevent HTML injection in notes
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        text || "";
+
+    return div.innerHTML;
+
+}
+
+
+// Load existing data
+renderTable();
+
+updateSummary();
+
+</script>
+
+</body>
+</html>
